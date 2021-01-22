@@ -1,4 +1,4 @@
-import express from 'express'
+import express from "express";
 // import bodyParser from 'body-parser'
 // import mongoose from 'mongoose'
 // import dotenv from 'dotenv'
@@ -10,16 +10,15 @@ import express from 'express'
 // import ErrorMiddleware from './middlewares/error.middleware'
 
 class App {
-
   public app: any;
 
   constructor() {
-    this.app = express()
+    this.app = express();
+    const test = "123123";
     // this._setConfig()
     // this._initMiddlewaresError()
     // this._setMongoConfig()
     // this._loadRoute()
-
   }
 
   // private _setConfig() {
@@ -60,4 +59,4 @@ class App {
   // }
 }
 
-export default new App().app
+export default new App().app;
