@@ -1,0 +1,43 @@
+version: "3.4"
+
+services: 
+  # app:
+  #   image: aff-mkt-backend:v1
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   volumes: 
+  #     - ./:/app
+  #   environment: 
+  #     - PORT=${PORT}
+  #   ports: 
+  #     - "${PORT}:${PORT}"
+  #   restart: unless-stopped
+  #   # networks:
+  #   #   - app-network
+  #   depends_on: 
+  #     - redis
+  #     - mongo
+  
+  mongo:
+    image: mongo
+    container_name: mongo
+    # environment:
+    #   - MONGO_INITDB_ROOT_USERNAME=root
+    #   - MONGO_INITDB_ROOT_PASSWORD=pw-shdmazzgl
+    #   - MONGO_INITDB_DATABASE=aff-test
+    ports: 
+      - 27017:27017
+    volumes: 
+      - ./.docker/data/mongo:/data/db
+    restart: unless-stopped
+    command: mongod
+
+  redis:
+    image: redis:5-alpine
+    container_name: redis
+    ports: 
+      - 6378:6379
+    volumes: 
+      - ./.docker/data/redis:/data/db
+    restart: unless-stopped
