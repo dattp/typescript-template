@@ -1,5 +1,6 @@
 import { IUserController } from "../controllers/interfaces/i.user.controller";
 import { IUserRoute } from "./interfaces/i.iser.route";
+import { AuthorizationMDW } from "../../middlewares/authorization.middleware";
 
 class UesrRoute implements IUserRoute {
   private app: any;
@@ -12,7 +13,11 @@ class UesrRoute implements IUserRoute {
   }
 
   public routes(): void {
-    this.app.get("/api/v1/user", this.userController.getUserByUsername);
+    this.app.get(
+      "/api/v1/user",
+      AuthorizationMDW.isValidUser,
+      this.userController.getUserByUsername
+    );
     this.app.post("/api/v1/user", this.userController.register);
   }
 }

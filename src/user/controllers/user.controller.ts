@@ -4,9 +4,11 @@ import { validateOrReject } from "class-validator";
 import { IUserService } from "../services/interfaces/i.user.service";
 import { IUserController } from "./interfaces/i.user.controller";
 import { UserDTO } from "../dtos/user.dto";
-import { ResponseDTO } from "../dtos/response.dto";
-import STATUSCODE from "../../constants/statuscode.constant";
+import { ResponseDTO } from "../../core/dtos/response.dto";
 import { IUser } from "../models/user.model";
+import STATUSCODE from "../../constants/statuscode.constant";
+import { ResponseMessage } from "../../constants/message.constants";
+import { Mailer } from "../../utils/mailer";
 
 class UserController implements IUserController {
   private static userService: IUserService;
@@ -45,7 +47,7 @@ class UserController implements IUserController {
         return ResponseDTO.createErrorResponse(
           res,
           STATUSCODE.NOT_FOUND,
-          "Missing body data"
+          ResponseMessage.MISSING_PARAM
         );
       }
       let userDTO: UserDTO;
@@ -67,20 +69,28 @@ class UserController implements IUserController {
         return ResponseDTO.createErrorResponse(
           res,
           STATUSCODE.ERROR_CMM,
-          "user existed"
+          ResponseMessage.USER_EXISTED
         );
       }
 
       const userCreate = await UserController.userService.register(userDTO);
       if (userCreate) {
+        Mailer.mailVerify(userDTO.getEmail(), userDTO.getFullname());
+
         return ResponseDTO.createSuccessResponse(
           res,
           STATUSCODE.SUCCESS,
-          "success"
+          ResponseMessage.SUCCESS
         );
       }
-      return ResponseDTO.createErrorResponse(res, STATUSCODE.NOT_FOUND, "fail");
+      return ResponseDTO.createErrorResponse(
+        res,
+        STATUSCODE.NOT_FOUND,
+        ResponseMessage.FAIL
+      );
     } catch (error) {
+      console.log(error);
+
       return ResponseDTO.createErrorResponse(
         res,
         STATUSCODE.SERVER_ERROR,
