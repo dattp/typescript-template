@@ -72,6 +72,9 @@ class UserDTO {
     return userDTO;
   }
   //getter and setter
+  getId(): string {
+    return this.id;
+  }
   getUsername(): string {
     return this.username;
   }
