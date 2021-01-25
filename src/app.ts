@@ -21,11 +21,8 @@ class App {
   public app: any;
 
   constructor() {
-    console.log("s", process.env.REDIS_PORT);
-
     this.app = express();
     this._setConfig();
-    console.log("s2", process.env.REDIS_PORT);
     this._initMiddlewaresError();
     this._connectMongoConfig();
     this._connectRedis();
