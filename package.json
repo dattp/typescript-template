@@ -27,6 +27,7 @@
   "homepage": "https://gitlab.com/a2z-tech/ict-k64/affliate-marketing-backend-publisher-v1#readme",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "class-validator": "^0.13.1",
     "dotenv": "^8.2.0",
     "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-prettier": "^3.3.1",

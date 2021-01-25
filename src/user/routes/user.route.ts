@@ -12,7 +12,8 @@ class UesrRoute implements IUserRoute {
   }
 
   public routes(): void {
-    this.app.get("/api/user", this.userController.getUserByUsername);
+    this.app.get("/api/v1/user", this.userController.getUserByUsername);
+    this.app.post("/api/v1/user", this.userController.register);
   }
 }
 
