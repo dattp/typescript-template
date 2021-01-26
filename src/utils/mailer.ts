@@ -6,7 +6,7 @@ class Mailer {
   private static readonly user = process.env.MAIL_USER as string;
   private static readonly password = process.env.MAIL_PASS as string;
 
-  public static mailVerify(receiver: string, name: string): void {
+  public static mailVerify(receiver: string, name: string, link: string): void {
     const transporter = nodemailer.createTransport({
       host: Mailer.host,
       port: parseInt(Mailer.port, 10),
@@ -24,7 +24,7 @@ class Mailer {
       text: `Hi ${name}!
 
       To finish signing up for a22z please click the link below to verify your email address:
-      <buid link>`,
+      ${link}`,
     };
 
     transporter.sendMail(option, (error, info) => {

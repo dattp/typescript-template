@@ -11,11 +11,15 @@ dotenv.config({
   path: join(__dirname, "../.env"),
 });
 
-import { UesrRoute } from "./user/routes/user.route";
+import { UserRoute } from "./user/routes/user.route";
 import { UserController } from "./user/controllers/user.controller";
 import { UserService } from "./user/services/user.service";
 
 import { AuthRoute } from "./auth/auth.route";
+
+import { UrlRoute } from "./url/routes/url.route";
+import { UrlController } from "./url/controllers/url.controller";
+import { UrlService } from "./url/services/url.service";
 
 class App {
   public app: any;
@@ -42,10 +46,15 @@ class App {
     //user
     const userService = new UserService();
     const userController = new UserController(userService);
-    new UesrRoute(this.app, userController);
+    new UserRoute(this.app, userController);
 
     //auth
     new AuthRoute(this.app);
+
+    //url
+    const urlService = new UrlService();
+    const urlController = new UrlController(urlService);
+    new UrlRoute(this.app, urlController);
   }
 
   private _initMiddlewaresError() {

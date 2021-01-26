@@ -6,8 +6,10 @@ import { JWTToken } from "../utils/jwt";
 import { UserService } from "../user/services/user.service";
 import { Helper } from "../utils/helper";
 import STATUSCODE from "../constants/statuscode.constant";
+import STATUSUSER from "../constants/statususer.constant";
 import { ResponseMessage } from "../constants/message.constants";
 import { ResponseDTO } from "../core/dtos/response.dto";
+import { IUser } from "../user/models/user.model";
 
 const redisClient = redis.createClient({
   host: process.env.REDIS_HOST,
@@ -29,8 +31,18 @@ class AuthController {
     const userService = new UserService();
     try {
       const user = await userService.getUserByUsername(username);
-
-      if (user && Helper.validatePassword(password, user.password, user.salt)) {
+      if (user.status === STATUSUSER.PENDING) {
+        return ResponseDTO.createErrorResponse(
+          res,
+          STATUSCODE.ERROR_CMM,
+          ResponseMessage.USER_NOT_ACTIVE
+        );
+      }
+      if (
+        user &&
+        user.status === STATUSUSER.ACTIVE &&
+        Helper.validatePassword(password, user.password, user.salt)
+      ) {
         const refreshToken = await JWTToken.generateToken(
           user,
           AuthController.refreshTokenSecret,
@@ -97,6 +109,49 @@ class AuthController {
         res,
         STATUSCODE.ERROR_CMM,
         ResponseMessage.USER_NOT_EXISTED
+      );
+    }
+  }
+
+  public async verifyEmail(req: Request, res: Response): Promise<Response> {
+    const id = req.query.id as string;
+    const token = req.query.token as string;
+    try {
+      if (!id || !token) {
+        return ResponseDTO.createErrorResponse(
+          res,
+          STATUSCODE.ERROR_CMM,
+          ResponseMessage.MISSING_PARAM
+        );
+      }
+      let urlRedirect = "http://localhost:9000/not-found";
+      const userService = new UserService();
+      const user: IUser = await userService.getUserById(id);
+      if (user.token === token) {
+        const updateStatusUser = await userService.updateStatusUser(
+          user.username,
+          STATUSUSER.ACTIVE
+        );
+        if (updateStatusUser) {
+          urlRedirect = "http://localhost:9000/api/v1/auth/login";
+          res.writeHead(301, {
+            Location: "http://localhost:9000/api/v1/auth/login",
+          });
+          res.end();
+          return res;
+        }
+      }
+      res.writeHead(301, {
+        Location: urlRedirect,
+      });
+      res.end();
+      return res;
+    } catch (error) {
+      console.log(error);
+      return ResponseDTO.createErrorResponse(
+        res,
+        STATUSCODE.SERVER_ERROR,
+        error
       );
     }
   }
