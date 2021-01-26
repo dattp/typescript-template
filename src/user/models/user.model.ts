@@ -5,6 +5,9 @@ enum UserType {
   customer = "customer",
 }
 
+/**
+ * status: 0 - deleted, 1 - active, 2 - pending
+ */
 export interface IUser extends Document {
   _id: string;
   username: string;
@@ -13,6 +16,8 @@ export interface IUser extends Document {
   usertype: UserType;
   password: string;
   salt: string;
+  status: number;
+  token: string;
 }
 
 const UserSchema: Schema = new Schema({
@@ -23,6 +28,8 @@ const UserSchema: Schema = new Schema({
   usertype: { type: String, required: true, enum: Object.values(UserType) },
   password: { type: String, required: true },
   salt: { type: String, required: true },
+  status: { type: Number, required: true, default: 2 },
+  token: { type: String },
 });
 
 // Export the model and return your IUser interface

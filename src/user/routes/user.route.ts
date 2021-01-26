@@ -2,7 +2,7 @@ import { IUserController } from "../controllers/interfaces/i.user.controller";
 import { IUserRoute } from "./interfaces/i.iser.route";
 import { AuthorizationMDW } from "../../middlewares/authorization.middleware";
 
-class UesrRoute implements IUserRoute {
+class UserRoute implements IUserRoute {
   private app: any;
   private userController: IUserController;
 
@@ -22,4 +22,4 @@ class UesrRoute implements IUserRoute {
   }
 }
 
-export { UesrRoute };
+export { UserRoute };

@@ -9,6 +9,7 @@ import { IUser } from "../models/user.model";
 import STATUSCODE from "../../constants/statuscode.constant";
 import { ResponseMessage } from "../../constants/message.constants";
 import { Mailer } from "../../utils/mailer";
+import { UrlController } from "../../url/controllers/url.controller";
 
 class UserController implements IUserController {
   private static userService: IUserService;
@@ -61,7 +62,7 @@ class UserController implements IUserController {
           error
         );
       }
-      const userExist = await await UserController.userService.getUserByUsername(
+      const userExist = await UserController.userService.getUserByUsername(
         userDTO.getUsername()
       );
 
@@ -75,8 +76,7 @@ class UserController implements IUserController {
 
       const userCreate = await UserController.userService.register(userDTO);
       if (userCreate) {
-        Mailer.mailVerify(userDTO.getEmail(), userDTO.getFullname());
-
+        UserController.verifyEmailRegister(userCreate);
         return ResponseDTO.createSuccessResponse(
           res,
           STATUSCODE.SUCCESS,
@@ -96,6 +96,20 @@ class UserController implements IUserController {
         STATUSCODE.SERVER_ERROR,
         error
       );
+    }
+  }
+
+  // add queue
+  public static async verifyEmailRegister(user: IUser): Promise<void> {
+    try {
+      const fullUrl = `${process.env.BASE_URL}api/v1/auth/verify-email?id=${user._id}&token=${user.token}`;
+      const shortUrlObj = await UrlController.createShortUrlCtl(fullUrl);
+      if (ResponseDTO.isSuccess(shortUrlObj)) {
+        const url = ResponseDTO.getData(shortUrlObj);
+        Mailer.mailVerify(user.email, user.fullname, url.short_url);
+      }
+    } catch (error) {
+      throw new Error(error);
     }
   }
 }

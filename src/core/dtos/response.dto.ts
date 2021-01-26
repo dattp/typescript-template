@@ -4,9 +4,21 @@ class ResponseDTO {
   private data: any;
   private statusCode: any;
   private error: any;
-  private static res: Response;
+  // private static res: Response;
 
   // constructor() { }
+
+  public static createResponse(
+    statusCode: number,
+    error: any,
+    data: any
+  ): ResponseDTO {
+    const responseFormat = new ResponseDTO();
+    responseFormat.statusCode = statusCode;
+    responseFormat.error = error;
+    responseFormat.data = data;
+    return responseFormat;
+  }
 
   public static createSuccessResponse(
     res: Response,
@@ -32,8 +44,20 @@ class ResponseDTO {
     return res.status(statusCode).send(responseFormat);
   }
 
-  isSuccess(): boolean {
-    return this.statusCode >= 200 && this.statusCode < 400;
+  public static isSuccess(reponse: ResponseDTO): boolean {
+    return reponse.statusCode >= 200 && reponse.statusCode < 400;
+  }
+
+  public static getStatusCode(reponse: ResponseDTO): number {
+    return reponse.statusCode;
+  }
+
+  public static getError(reponse: ResponseDTO): any {
+    return reponse.error;
+  }
+
+  public static getData(reponse: ResponseDTO): any {
+    return reponse.data;
   }
 }
 
