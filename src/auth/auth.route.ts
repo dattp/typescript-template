@@ -1,4 +1,5 @@
 import { AuthController } from "./auth.controller";
+import { AuthorizationMDW } from "../middlewares/authorization.middleware";
 
 class AuthRoute {
   private app: any;
@@ -12,6 +13,11 @@ class AuthRoute {
 
   public routes(): void {
     this.app.post("/api/v1/auth/login", AuthRoute.authController.login);
+    this.app.post(
+      "/api/v1/auth/logout",
+      AuthorizationMDW.isValidUser,
+      AuthRoute.authController.logout
+    );
     this.app.get(
       "/api/v1/auth/verify-email",
       AuthRoute.authController.verifyEmail

@@ -4,6 +4,7 @@ const redis = bluebird.promisifyAll(require("redis"));
 
 import { JWTToken } from "../utils/jwt";
 import { UserDTO } from "../user/dtos/user.dto";
+import { AnyAaaaRecord } from "dns";
 
 const redisClient = redis.createClient({
   host: process.env.REDIS_HOST,
@@ -13,7 +14,7 @@ const redisClient = redis.createClient({
 declare global {
   namespace Express {
     interface Request {
-      user: UserDTO;
+      user: any;
     }
   }
 }
@@ -40,7 +41,8 @@ class AuthorizationMDW {
       if (!accessToken || accessToken !== tokenClient) {
         return res.sendStatus(401);
       }
-      req.user = userDto.toUser(userDecoded.data);
+      const user = userDto.toUser(userDecoded.data);
+      req.user = { ...user, refresh_token: refreshToken };
       return next();
     } catch (error) {
       console.log(error);

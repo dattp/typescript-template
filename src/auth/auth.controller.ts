@@ -76,6 +76,33 @@ class AuthController {
     }
   }
 
+  public async logout(req: Request, res: Response): Promise<Response> {
+    try {
+      const refreshToken: string = req.user.refresh_token as string;
+      const result = await redisClient.delAsync(`auth:${refreshToken}`);
+      if (result) {
+        return ResponseDTO.createSuccessResponse(
+          res,
+          STATUSCODE.SUCCESS,
+          ResponseMessage.SUCCESS
+        );
+      } else {
+        return ResponseDTO.createErrorResponse(
+          res,
+          STATUSCODE.ERROR_CMM,
+          ResponseMessage.FAIL
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      return ResponseDTO.createErrorResponse(
+        res,
+        STATUSCODE.SERVER_ERROR,
+        error
+      );
+    }
+  }
+
   public async accessToken(req: Request, res: Response): Promise<Response> {
     const refreshToken = req.body.refresh_token;
     const tokenExisted = await redisClient.existsAsync(`auth:${refreshToken}`);
