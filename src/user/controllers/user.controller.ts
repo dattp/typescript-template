@@ -76,7 +76,6 @@ class UserController implements IUserController {
 
       const userCreate = await UserController.userService.register(userDTO);
       if (userCreate) {
-        console.log("======>userCreate: ", userCreate);
         UserController.verifyEmailRegister(userCreate);
         return ResponseDTO.createSuccessResponse(
           res,
