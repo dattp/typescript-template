@@ -25,6 +25,8 @@ class UserController implements IUserController {
     res: Response
   ): Promise<Response> {
     try {
+      console.log("======>user: ", req.user);
+
       const username = req.query.username as string;
       const user = await UserController.userService.getUserByUsername(username);
       return ResponseDTO.createSuccessResponse(
