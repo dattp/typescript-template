@@ -27,10 +27,17 @@ class UserController implements IUserController {
     try {
       const username = req.query.username as string;
       const user = await UserController.userService.getUserByUsername(username);
-      return ResponseDTO.createSuccessResponse(
+      if (user) {
+        return ResponseDTO.createSuccessResponse(
+          res,
+          STATUSCODE.SUCCESS,
+          UserController.userDTO.toUser(user)
+        );
+      }
+      return ResponseDTO.createErrorResponse(
         res,
-        STATUSCODE.SUCCESS,
-        UserController.userDTO.toUser(user)
+        STATUSCODE.NOT_FOUND,
+        ResponseMessage.USER_NOT_EXISTED
       );
     } catch (error) {
       return ResponseDTO.createErrorResponse(

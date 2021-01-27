@@ -6,7 +6,7 @@ import { UserDTO } from "../dtos/user.dto";
 import { Helper } from "../../utils/helper";
 
 class UserService implements IUserService {
-  public async getUserByUsername(username: string): Promise<IUser> {
+  public async getUserByUsername(username: string): Promise<IUser | null> {
     try {
       return UserModel.findOne({ username }).lean();
     } catch (error) {
@@ -15,20 +15,21 @@ class UserService implements IUserService {
     }
   }
 
-  public async register(user: UserDTO): Promise<IUser> {
+  public async register(user: UserDTO): Promise<IUser | null> {
     try {
       const salt = Helper.createSalt();
       const password = Helper.hashPassword(user.getPassword(), salt);
       const token = uuidv4();
       const userCreate = { ...user, password, salt, token };
-      return UserModel.create(userCreate);
+      const userModel = new UserModel(userCreate);
+      return UserModel.create(userModel);
     } catch (error) {
       console.log(error);
       throw new Error(error);
     }
   }
 
-  public async getUserById(id: string): Promise<IUser> {
+  public async getUserById(id: string): Promise<IUser | null> {
     try {
       return UserModel.findById(id).lean();
     } catch (error) {
@@ -40,7 +41,7 @@ class UserService implements IUserService {
   public async updateStatusUser(
     username: string,
     status: number
-  ): Promise<IUser> {
+  ): Promise<IUser | null> {
     try {
       return UserModel.findOneAndUpdate({ username }, { status });
     } catch (error) {

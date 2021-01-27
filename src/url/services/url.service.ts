@@ -5,7 +5,7 @@ import { IUrlService } from "./interfaces/i.url.service";
 import { UrlDTO } from "../dtos/url.dto";
 
 class UrlService implements IUrlService {
-  public async getFullUrl(shortUrl: string): Promise<IUrl> {
+  public async getFullUrl(shortUrl: string): Promise<IUrl | null> {
     try {
       return UrlModel.findOne({ short_url: shortUrl }).lean();
     } catch (error) {
@@ -16,7 +16,8 @@ class UrlService implements IUrlService {
 
   public async createShortUrl(urlDto: UrlDTO): Promise<IUrl> {
     try {
-      return UrlModel.create(urlDto);
+      const urlModel = new UrlModel(urlDto);
+      return UrlModel.create(urlModel);
     } catch (error) {
       console.log(error);
       throw new Error(error);

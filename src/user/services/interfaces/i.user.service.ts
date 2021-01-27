@@ -2,8 +2,9 @@ import { IUser } from "../../models/user.model";
 import { UserDTO } from "../../dtos/user.dto";
 
 interface IUserService {
-  getUserByUsername(username: string): Promise<IUser>;
-  register(user: UserDTO): Promise<IUser>;
+  getUserByUsername(username: string): Promise<IUser | null>;
+  register(user: UserDTO): Promise<IUser | null>;
+  updateStatusUser(username: string, status: number): Promise<IUser | null>;
 }
 
 export { IUserService };

@@ -30,6 +30,7 @@ class AuthorizationMDW {
   ): Promise<any> {
     const userDto = new UserDTO();
     const tokenClient = req.headers["authorization"] as string;
+
     try {
       const userDecoded = await JWTToken.verifyToken(
         tokenClient,
