@@ -9,7 +9,6 @@ enum UserType {
  * status: 0 - deleted, 1 - active, 2 - pending
  */
 export interface IUser extends Document {
-  _id: string;
   username: string;
   fullname: string;
   email: string;

@@ -31,7 +31,7 @@ class AuthController {
     const userService = new UserService();
     try {
       const user = await userService.getUserByUsername(username);
-      if (user.status === STATUSUSER.PENDING) {
+      if (user && user.status === STATUSUSER.PENDING) {
         return ResponseDTO.createErrorResponse(
           res,
           STATUSCODE.ERROR_CMM,
@@ -153,8 +153,8 @@ class AuthController {
       }
       let urlRedirect = "http://localhost:9000/not-found";
       const userService = new UserService();
-      const user: IUser = await userService.getUserById(id);
-      if (user.token === token) {
+      const user = await userService.getUserById(id);
+      if (user && user.token === token) {
         const updateStatusUser = await userService.updateStatusUser(
           user.username,
           STATUSUSER.ACTIVE

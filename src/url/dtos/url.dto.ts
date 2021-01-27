@@ -30,6 +30,7 @@ class UrlDTO {
 
   public createUrlDTO(fullUrl: string, shortUrl: string): UrlDTO {
     const urlDTO = new UrlDTO();
+    urlDTO.id = "";
     urlDTO.full_url = fullUrl;
     urlDTO.short_url = shortUrl;
     return urlDTO;
@@ -39,11 +40,22 @@ class UrlDTO {
   getId(): string {
     return this.id;
   }
+  setId(id: string): void {
+    this.id = id;
+  }
+
   getFullUrl(): string {
     return this.full_url;
   }
-  getShort(): string {
+  setFullUrl(fullUrl: string): void {
+    this.full_url = fullUrl;
+  }
+
+  getShortUrl(): string {
     return this.short_url;
+  }
+  setShortUrl(shortUrl: string): void {
+    this.short_url = shortUrl;
   }
 }
 

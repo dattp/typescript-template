@@ -4,12 +4,17 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import morgan from "morgan";
 import { join } from "path";
+import swaggerUi from "swagger-ui-express";
+import basicAuth from "express-basic-auth";
+
 const bluebird = require("bluebird");
 const redis = bluebird.promisifyAll(require("redis"));
 
 dotenv.config({
   path: join(__dirname, "../.env"),
 });
+
+import * as swaggerDocument from "./configs/swaggers/swagger.config.json";
 
 import { UserRoute } from "./user/routes/user.route";
 import { UserController } from "./user/controllers/user.controller";
@@ -37,6 +42,16 @@ class App {
     this.app.use(bodyParser.json({ limit: "50mb" }));
     this.app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
     this.app.use(morgan("dev"));
+    this.app.use(
+      "/api-docs",
+      basicAuth({
+        users: { a22z: "a22z" },
+        challenge: true,
+        realm: "Imb4T3st4pp",
+      }),
+      swaggerUi.serve,
+      swaggerUi.setup(swaggerDocument)
+    );
   }
 
   private _loadRoute() {
