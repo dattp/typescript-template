@@ -16,7 +16,6 @@ export interface IUser extends Document {
   password: string;
   salt: string;
   status: number;
-  token: string;
 }
 
 const UserSchema: Schema = new Schema({
@@ -28,7 +27,6 @@ const UserSchema: Schema = new Schema({
   password: { type: String, required: true },
   salt: { type: String, required: true },
   status: { type: Number, required: true, default: 2 },
-  token: { type: String },
 });
 
 // Export the model and return your IUser interface

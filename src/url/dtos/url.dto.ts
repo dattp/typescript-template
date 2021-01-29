@@ -6,18 +6,35 @@ class UrlDTO {
   private id: string;
 
   @IsNotEmpty({
-    message: "long url is not empty",
+    message: "full url is not empty",
   })
   @IsString()
   private full_url: string;
 
+  @IsNotEmpty({
+    message: "short url is not empty",
+  })
   @IsString()
   private short_url: string;
+
+  @IsNotEmpty({
+    message: "username url is not empty",
+  })
+  @IsString()
+  private username: string;
+
+  @IsNotEmpty({
+    message: "token url is not empty",
+  })
+  @IsString()
+  private token: string;
 
   constructor() {
     this.id = "";
     this.full_url = "";
     this.short_url = "";
+    this.username = "";
+    this.token = "";
   }
 
   public toUrl(url: IUrl): UrlDTO {
@@ -25,14 +42,23 @@ class UrlDTO {
     urlDTO.id = url._id;
     urlDTO.full_url = url.full_url;
     urlDTO.short_url = process.env.BASE_URL + url.short_url;
+    urlDTO.username = url.username;
+    urlDTO.token = url.token;
     return urlDTO;
   }
 
-  public createUrlDTO(fullUrl: string, shortUrl: string): UrlDTO {
+  public createUrlDTO(
+    fullUrl: string,
+    shortUrl: string,
+    username: string,
+    token: string
+  ): UrlDTO {
     const urlDTO = new UrlDTO();
     urlDTO.id = "";
     urlDTO.full_url = fullUrl;
     urlDTO.short_url = shortUrl;
+    urlDTO.username = username;
+    urlDTO.token = token;
     return urlDTO;
   }
 

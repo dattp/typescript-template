@@ -1,11 +1,9 @@
-import { v4 as uuidv4 } from "uuid";
-
 import UrlModel, { IUrl } from "../models/url.model";
 import { IUrlService } from "./interfaces/i.url.service";
 import { UrlDTO } from "../dtos/url.dto";
 
 class UrlService implements IUrlService {
-  public async getFullUrl(shortUrl: string): Promise<IUrl | null> {
+  public async getlUrl(shortUrl: string): Promise<IUrl | null> {
     try {
       return UrlModel.findOne({ short_url: shortUrl }).lean();
     } catch (error) {
