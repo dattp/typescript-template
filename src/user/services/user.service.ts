@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
-
 import UserModel, { IUser } from "../models/user.model";
 import { IUserService } from "./interfaces/i.user.service";
 import { UserDTO } from "../dtos/user.dto";
@@ -19,8 +17,7 @@ class UserService implements IUserService {
     try {
       const salt = Helper.createSalt();
       const password = Helper.hashPassword(user.getPassword(), salt);
-      const token = uuidv4();
-      const userCreate = { ...user, password, salt, token };
+      const userCreate = { ...user, password, salt };
       const userModel = new UserModel(userCreate);
       return UserModel.create(userModel);
     } catch (error) {

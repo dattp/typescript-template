@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { validateOrReject } from "class-validator";
 import shortid from "shortid";
+import { v4 as uuidv4 } from "uuid";
 
 import { IUrlController } from "./interfaces/i.url.controller";
 import { ResponseDTO } from "../../core/dtos/response.dto";
@@ -24,7 +25,7 @@ class UrlController implements IUrlController {
   ): Promise<Response> {
     const shortUrl = req.params.short_url as string;
     try {
-      const url = await UrlController.urlService.getFullUrl(shortUrl);
+      const url = await UrlController.urlService.getlUrl(shortUrl);
       if (!url) {
         return ResponseDTO.createErrorResponse(
           res,
@@ -71,9 +72,11 @@ class UrlController implements IUrlController {
     }
   }
 
-  public static async createShortUrlCtl(fullUrl: string): Promise<ResponseDTO> {
+  public static async createShortUrlCtl(
+    username: string
+  ): Promise<ResponseDTO> {
     try {
-      if (!fullUrl) {
+      if (!username) {
         return ResponseDTO.createResponse(
           STATUSCODE.NOT_FOUND,
           ResponseMessage.MISSING_PARAM,
@@ -83,7 +86,15 @@ class UrlController implements IUrlController {
       let urlDTO: UrlDTO;
       try {
         const shorUrl: string = shortid.generate();
-        urlDTO = UrlController.urlDTO.createUrlDTO(fullUrl, shorUrl);
+        const token = uuidv4();
+        const fullUrl = `${process.env.BASE_URL_AUTH}verify-email?short=${shorUrl}&token=${token}`;
+
+        urlDTO = UrlController.urlDTO.createUrlDTO(
+          fullUrl,
+          shorUrl,
+          username,
+          token
+        );
         await validateOrReject(urlDTO);
       } catch (error) {
         return ResponseDTO.createResponse(

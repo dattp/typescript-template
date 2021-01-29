@@ -9,7 +9,7 @@ import STATUSCODE from "../constants/statuscode.constant";
 import STATUSUSER from "../constants/statususer.constant";
 import { ResponseMessage } from "../constants/message.constants";
 import { ResponseDTO } from "../core/dtos/response.dto";
-import { IUser } from "../user/models/user.model";
+import { UrlService } from "../url/services/url.service";
 
 const redisClient = redis.createClient({
   host: process.env.REDIS_HOST,
@@ -141,10 +141,10 @@ class AuthController {
   }
 
   public async verifyEmail(req: Request, res: Response): Promise<Response> {
-    const id = req.query.id as string;
+    const short = req.query.short as string;
     const token = req.query.token as string;
     try {
-      if (!id || !token) {
+      if (!short || !token) {
         return ResponseDTO.createErrorResponse(
           res,
           STATUSCODE.ERROR_CMM,
@@ -153,10 +153,12 @@ class AuthController {
       }
       let urlRedirect = "http://localhost:9000/not-found";
       const userService = new UserService();
-      const user = await userService.getUserById(id);
-      if (user && user.token === token) {
+      const urlService = new UrlService();
+      const url = await urlService.getlUrl(short);
+      // if (user && user.token === token) {
+      if (url && url.token === token) {
         const updateStatusUser = await userService.updateStatusUser(
-          user.username,
+          url.username,
           STATUSUSER.ACTIVE
         );
         if (updateStatusUser) {
