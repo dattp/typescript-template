@@ -14,11 +14,11 @@ class UserRoute implements IUserRoute {
 
   public routes(): void {
     this.app.get(
-      "/pub/api/v1/user",
+      "/api/v1/user",
       AuthorizationMDW.isValidUser,
       this.userController.getUserByUsername
     );
-    this.app.post("/pub/api/v1/user", this.userController.register);
+    this.app.post("/api/v1/user", this.userController.register);
   }
 }
 

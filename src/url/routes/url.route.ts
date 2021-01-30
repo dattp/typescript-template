@@ -13,7 +13,7 @@ class UrlRoute implements IUrlRoute {
 
   public routes(): void {
     this.app.get("/:short_url", this.urlController.getFullUrlByShortUrl);
-    this.app.post("/pub/api/v1/url", this.urlController.createUrl);
+    this.app.post("/api/v1/url", this.urlController.createUrl);
   }
 }
 
