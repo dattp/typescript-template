@@ -162,9 +162,11 @@ class AuthController {
           STATUSUSER.ACTIVE
         );
         if (updateStatusUser) {
-          urlRedirect = "http://localhost:9000/api/v1/auth/login";
+          urlRedirect = process.env.PUB_LOGIN as string;
+          console.log("======>urlRedirect: ", urlRedirect);
+
           res.writeHead(301, {
-            Location: "http://localhost:9000/api/v1/auth/login",
+            Location: urlRedirect,
           });
           res.end();
           return res;
