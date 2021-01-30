@@ -12,18 +12,18 @@ class AuthRoute {
   }
 
   public routes(): void {
-    this.app.post("/api/v1/auth/login", AuthRoute.authController.login);
+    this.app.post("/pub/api/v1/auth/login", AuthRoute.authController.login);
     this.app.post(
-      "/api/v1/auth/logout",
+      "/pub/api/v1/auth/logout",
       AuthorizationMDW.isValidUser,
       AuthRoute.authController.logout
     );
     this.app.get(
-      "/api/v1/auth/verify-email",
+      "/pub/api/v1/auth/verify-email",
       AuthRoute.authController.verifyEmail
     );
     this.app.post(
-      "/api/v1/auth/access-token",
+      "/pub/api/v1/auth/access-token",
       AuthRoute.authController.accessToken
     );
   }

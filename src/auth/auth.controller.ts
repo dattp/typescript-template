@@ -163,8 +163,6 @@ class AuthController {
         );
         if (updateStatusUser) {
           urlRedirect = process.env.PUB_LOGIN as string;
-          console.log("======>urlRedirect: ", urlRedirect);
-
           res.writeHead(301, {
             Location: urlRedirect,
           });
