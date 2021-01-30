@@ -109,7 +109,6 @@ class UserController implements IUserController {
   // add queue
   public static async verifyEmailRegister(user: IUser): Promise<void> {
     try {
-      const fullUrl = `${process.env.BASE_URL}api/v1/auth/verify-email?id=${user._id}`;
       const shortUrlObj = await UrlController.createShortUrlCtl(user.username);
       if (ResponseDTO.isSuccess(shortUrlObj)) {
         const url = ResponseDTO.getData(shortUrlObj);
