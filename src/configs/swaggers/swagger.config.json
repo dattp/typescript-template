@@ -283,9 +283,6 @@
         "fullname": {
           "type": "string"
         },
-        "usertype": {
-          "type": "string"
-        },
         "password": {
           "type": "string"
         },

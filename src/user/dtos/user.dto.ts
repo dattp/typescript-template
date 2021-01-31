@@ -67,7 +67,7 @@ class UserDTO {
     userDTO.username = user.username;
     userDTO.fullname = user.fullname;
     userDTO.email = user.email;
-    userDTO.usertype = user.usertype;
+    userDTO.usertype = UserType.pub;
     userDTO.password = user.password;
     return userDTO;
   }
