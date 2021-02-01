@@ -3,6 +3,8 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import morgan from "morgan";
+import helmet from "helmet";
+import cors from "cors";
 import { join } from "path";
 import swaggerUi from "swagger-ui-express";
 import basicAuth from "express-basic-auth";
@@ -42,6 +44,8 @@ class App {
     this.app.use(bodyParser.json({ limit: "50mb" }));
     this.app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
     this.app.use(morgan("dev"));
+    this.app.use(helmet());
+    this.app.use(cors());
     this.app.use(
       "/api-docs",
       basicAuth({
