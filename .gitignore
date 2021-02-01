@@ -116,4 +116,6 @@ src/.DS_Store
 
 .docker
 
+uploads
+
 # End of https://www.toptal.com/developers/gitignore/api/node

@@ -32,6 +32,14 @@ class ResponseDTO {
     return res.status(statusCode).send(responseFormat);
   }
 
+  public static createSuccessResponseFile(
+    res: Response,
+    statusCode = 200,
+    data: any
+  ): void {
+    return res.status(statusCode).sendFile(data);
+  }
+
   public static createErrorResponse(
     res: Response,
     statusCode = 400,

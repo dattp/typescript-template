@@ -16,7 +16,6 @@
     "**/*.test.ts"
   ],
   "include": [
-    "src/**/*.ts",
-    "src/user/models/user.model.js"
+    "src/**/*.ts"
   ]
 }
