@@ -4,7 +4,6 @@ const redis = bluebird.promisifyAll(require("redis"));
 
 import { JWTToken } from "../utils/jwt";
 import { UserDTO } from "../user/dtos/user.dto";
-import { AnyAaaaRecord } from "dns";
 
 const redisClient = redis.createClient({
   host: process.env.REDIS_HOST,
