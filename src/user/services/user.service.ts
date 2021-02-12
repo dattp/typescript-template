@@ -46,6 +46,22 @@ class UserService implements IUserService {
       throw new Error(error);
     }
   }
+
+  public async updateProfile(userUpdate: IUser): Promise<IUser | null> {
+    try {
+      if (userUpdate.password) {
+        const salt = Helper.createSalt();
+        const password = Helper.hashPassword(userUpdate.password, salt);
+        userUpdate = { ...userUpdate, password, salt } as IUser;
+      }
+      return UserModel.findOneAndUpdate(
+        { username: userUpdate.username },
+        userUpdate
+      );
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
 }
 
 export { UserService };

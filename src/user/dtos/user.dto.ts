@@ -71,6 +71,20 @@ class UserDTO {
     userDTO.password = user.password;
     return userDTO;
   }
+
+  public toUserUpdate(
+    username: string,
+    fullname: string,
+    password: string,
+    email: string
+  ): UserDTO {
+    const userDTO = new UserDTO();
+    userDTO.username = username;
+    userDTO.fullname = fullname || "";
+    userDTO.password = password || "";
+    userDTO.email = email || "";
+    return userDTO;
+  }
   //getter and setter
   getId(): string {
     return this.id;

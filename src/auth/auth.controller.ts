@@ -64,7 +64,7 @@ class AuthController {
       return ResponseDTO.createErrorResponse(
         res,
         STATUSCODE.ERROR_CMM,
-        ResponseMessage.USER_EXISTED
+        ResponseMessage.USER_NOT_ACTIVE
       );
     } catch (error) {
       console.log(error);

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { validateOrReject } from "class-validator";
+import { omitBy, isEmpty } from "lodash";
 
 import { IUserService } from "../services/interfaces/i.user.service";
 import { IUserController } from "./interfaces/i.user.controller";
@@ -116,6 +117,67 @@ class UserController implements IUserController {
       }
     } catch (error) {
       throw new Error(error);
+    }
+  }
+
+  public async getInfoUser(req: Request, res: Response): Promise<Response> {
+    try {
+      const username: string = req.user.username;
+      const user = await UserController.userService.getUserByUsername(username);
+      if (user) {
+        return ResponseDTO.createSuccessResponse(
+          res,
+          STATUSCODE.SUCCESS,
+          UserController.userDTO.toUser(user)
+        );
+      }
+      return ResponseDTO.createErrorResponse(
+        res,
+        STATUSCODE.NOT_FOUND,
+        ResponseMessage.USER_NOT_EXISTED
+      );
+    } catch (error) {
+      return ResponseDTO.createErrorResponse(
+        res,
+        STATUSCODE.SERVER_ERROR,
+        error.message
+      );
+    }
+  }
+
+  public async editProfile(req: Request, res: Response): Promise<Response> {
+    try {
+      const username: string = req.user.username;
+      const { fullname, password, email } = req.body;
+
+      const userDTO = UserController.userDTO.toUserUpdate(
+        username,
+        fullname,
+        password,
+        email
+      );
+      const userDTOOmit = omitBy(userDTO, isEmpty) as IUser;
+      const userUpdate = await UserController.userService.updateProfile(
+        userDTOOmit
+      );
+      if (userUpdate) {
+        return ResponseDTO.createSuccessResponse(
+          res,
+          STATUSCODE.SUCCESS,
+          ResponseMessage.SUCCESS
+        );
+      }
+      return ResponseDTO.createErrorResponse(
+        res,
+        STATUSCODE.ERROR_CMM,
+        ResponseMessage.FAIL
+      );
+    } catch (error) {
+      return ResponseDTO.createErrorResponse(
+        res,
+        STATUSCODE.SERVER_ERROR,
+        error.message
+      );
     }
   }
 }
