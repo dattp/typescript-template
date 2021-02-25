@@ -72,11 +72,9 @@ class UrlController implements IUrlController {
     }
   }
 
-  public static async createShortUrlCtl(
-    username: string
-  ): Promise<ResponseDTO> {
+  public static async createShortUrlCtl(email: string): Promise<ResponseDTO> {
     try {
-      if (!username) {
+      if (!email) {
         return ResponseDTO.createResponse(
           STATUSCODE.NOT_FOUND,
           ResponseMessage.MISSING_PARAM,
@@ -92,7 +90,7 @@ class UrlController implements IUrlController {
         urlDTO = UrlController.urlDTO.createUrlDTO(
           fullUrl,
           shorUrl,
-          username,
+          email,
           token
         );
         await validateOrReject(urlDTO);

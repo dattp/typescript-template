@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString } from "class-validator";
 
 import { IUrl } from "../models/url.model";
 
@@ -18,10 +18,10 @@ class UrlDTO {
   private short_url: string;
 
   @IsNotEmpty({
-    message: "username url is not empty",
+    message: "email url is not empty",
   })
-  @IsString()
-  private username: string;
+  @IsEmail()
+  private email: string;
 
   @IsNotEmpty({
     message: "token url is not empty",
@@ -33,7 +33,7 @@ class UrlDTO {
     this.id = "";
     this.full_url = "";
     this.short_url = "";
-    this.username = "";
+    this.email = "";
     this.token = "";
   }
 
@@ -42,7 +42,7 @@ class UrlDTO {
     urlDTO.id = url._id;
     urlDTO.full_url = url.full_url;
     urlDTO.short_url = process.env.BASE_URL + url.short_url;
-    urlDTO.username = url.username;
+    urlDTO.email = url.email;
     urlDTO.token = url.token;
     return urlDTO;
   }
@@ -50,14 +50,14 @@ class UrlDTO {
   public createUrlDTO(
     fullUrl: string,
     shortUrl: string,
-    username: string,
+    email: string,
     token: string
   ): UrlDTO {
     const urlDTO = new UrlDTO();
     urlDTO.id = "";
     urlDTO.full_url = fullUrl;
     urlDTO.short_url = shortUrl;
-    urlDTO.username = username;
+    urlDTO.email = email;
     urlDTO.token = token;
     return urlDTO;
   }

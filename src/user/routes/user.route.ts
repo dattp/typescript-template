@@ -16,18 +16,21 @@ class UserRoute implements IUserRoute {
     this.app.get(
       "/api/v1/user",
       AuthorizationMDW.isValidUser,
-      this.userController.getUserByUsername
+      this.userController.getUserByEmail
     );
+
     this.app.get(
       "/api/v1/user/info-user",
       AuthorizationMDW.isValidUser,
       this.userController.getInfoUser
     );
+
     this.app.post(
       "/api/v1/user/edit-profile",
       AuthorizationMDW.isValidUser,
       this.userController.editProfile
     );
+
     this.app.post("/api/v1/user", this.userController.register);
   }
 }

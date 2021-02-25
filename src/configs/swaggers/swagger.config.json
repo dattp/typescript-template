@@ -24,6 +24,10 @@
     {
       "name": "auth",
       "description": "Access to auth"
+    },
+    {
+      "name": "campaign",
+      "description": "Access to campaign"
     }
   ],
   "schemes": [
@@ -71,17 +75,17 @@
         "tags": [
           "users"
         ],
-        "summary": "get user by username",
+        "summary": "get user by email",
         "description": "",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "application/xml"
+          "application/json"
         ],
         "parameters": [
           {
-            "name": "username",
+            "name": "email",
             "in": "query",
             "description": "The user name for login",
             "required": true,
@@ -153,7 +157,7 @@
           "application/json"
         ],
         "produces": [
-          "application/xml"
+          "application/json"
         ],
         "responses": {
           "400": {
@@ -195,7 +199,7 @@
             "schema": {
               "type": "object",
               "properties": {
-                "username": {
+                "email": {
                   "type": "string"
                 },
                 "password": {
@@ -226,7 +230,7 @@
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/ApiResponse"
+              "$ref": "#/definitions/Response"
             }
           },
           "400": {
@@ -270,7 +274,7 @@
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/ApiResponse"
+              "$ref": "#/definitions/Response"
             }
           }
         },
@@ -286,6 +290,157 @@
           "api_key": []
         }
       ]
+    },
+    "/api/v1/campaigns": {
+      "get": {
+        "tags": [
+          "campaign"
+        ],
+        "summary": "get all campaigns",
+        "description": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "campaign not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/campaigns/registered": {
+      "get": {
+        "tags": [
+          "campaign"
+        ],
+        "summary": "get all campaigns registered",
+        "description": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "registed = 1, pedding = 2, destroy = 3, locked = 4",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "campaign not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/campaigns/{id}": {
+      "get": {
+        "tags": [
+          "campaign"
+        ],
+        "summary": "get campaign detail",
+        "description": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id campaign",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "campaign not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/campaigns/register": {
+      "post": {
+        "tags": [
+          "campaign"
+        ],
+        "summary": "pub register campaign",
+        "description": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "user object",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
     }
   },
   "securityDefinitions": {
@@ -299,9 +454,6 @@
     "User": {
       "type": "object",
       "properties": {
-        "username": {
-          "type": "string"
-        },
         "fullname": {
           "type": "string"
         },
@@ -311,9 +463,6 @@
         "email": {
           "type": "string"
         }
-      },
-      "xml": {
-        "name": "User"
       }
     },
     "UserUpdate": {
@@ -324,16 +473,10 @@
         },
         "password": {
           "type": "string"
-        },
-        "email": {
-          "type": "string"
         }
-      },
-      "xml": {
-        "name": "User"
       }
     },
-    "ApiResponse": {
+    "Response": {
       "type": "object",
       "properties": {
         "code": {

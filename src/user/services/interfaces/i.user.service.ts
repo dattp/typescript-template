@@ -1,10 +1,9 @@
 import { IUser } from "../../models/user.model";
-import { UserDTO } from "../../dtos/user.dto";
 
 interface IUserService {
-  getUserByUsername(username: string): Promise<IUser | null>;
-  register(user: UserDTO): Promise<IUser | null>;
-  updateStatusUser(username: string, status: number): Promise<IUser | null>;
+  getUserByEmail(email: string): Promise<IUser | null>;
+  register(user: IUser): Promise<IUser | null>;
+  updateStatusUser(email: string, status: number): Promise<IUser | null>;
   updateProfile(userUpdate: IUser): Promise<IUser | null>;
 }
 
