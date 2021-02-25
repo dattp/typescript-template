@@ -1,25 +1,19 @@
 import UserModel, { IUser } from "../models/user.model";
 import { IUserService } from "./interfaces/i.user.service";
-import { UserDTO } from "../dtos/user.dto";
-import { Helper } from "../../utils/helper";
 
 class UserService implements IUserService {
-  public async getUserByUsername(username: string): Promise<IUser | null> {
+  public async getUserByEmail(email: string): Promise<IUser | null> {
     try {
-      return UserModel.findOne({ username }).lean();
+      return UserModel.findOne({ email }).lean();
     } catch (error) {
       console.log(error);
       throw new Error(error);
     }
   }
 
-  public async register(user: UserDTO): Promise<IUser | null> {
+  public async register(user: IUser): Promise<IUser | null> {
     try {
-      const salt = Helper.createSalt();
-      const password = Helper.hashPassword(user.getPassword(), salt);
-      const userCreate = { ...user, password, salt };
-      const userModel = new UserModel(userCreate);
-      return UserModel.create(userModel);
+      return UserModel.create(user);
     } catch (error) {
       console.log(error);
       throw new Error(error);
@@ -36,11 +30,11 @@ class UserService implements IUserService {
   }
 
   public async updateStatusUser(
-    username: string,
+    email: string,
     status: number
   ): Promise<IUser | null> {
     try {
-      return UserModel.findOneAndUpdate({ username }, { status });
+      return UserModel.findOneAndUpdate({ email }, { status });
     } catch (error) {
       console.log(error);
       throw new Error(error);
@@ -49,13 +43,8 @@ class UserService implements IUserService {
 
   public async updateProfile(userUpdate: IUser): Promise<IUser | null> {
     try {
-      if (userUpdate.password) {
-        const salt = Helper.createSalt();
-        const password = Helper.hashPassword(userUpdate.password, salt);
-        userUpdate = { ...userUpdate, password, salt } as IUser;
-      }
       return UserModel.findOneAndUpdate(
-        { username: userUpdate.username },
+        { email: userUpdate.email },
         userUpdate
       );
     } catch (error) {

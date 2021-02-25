@@ -11,6 +11,7 @@ import STATUSCODE from "../../constants/statuscode.constant";
 import { ResponseMessage } from "../../constants/message.constants";
 import { Mailer } from "../../utils/mailer";
 import { UrlController } from "../../url/controllers/url.controller";
+import { Helper } from "../../utils/helper";
 
 class UserController implements IUserController {
   private static userService: IUserService;
@@ -21,13 +22,10 @@ class UserController implements IUserController {
     UserController.userDTO = new UserDTO();
   }
 
-  public async getUserByUsername(
-    req: Request,
-    res: Response
-  ): Promise<Response> {
+  public async getUserByEmail(req: Request, res: Response): Promise<Response> {
     try {
-      const username = req.query.username as string;
-      const user = await UserController.userService.getUserByUsername(username);
+      const email = req.query.email as string;
+      const user = await UserController.userService.getUserByEmail(email);
       if (user) {
         return ResponseDTO.createSuccessResponse(
           res,
@@ -51,7 +49,8 @@ class UserController implements IUserController {
 
   public async register(req: Request, res: Response): Promise<Response> {
     try {
-      const user: IUser = req.body;
+      const user: UserDTO = req.body;
+
       if (!user) {
         return ResponseDTO.createErrorResponse(
           res,
@@ -61,7 +60,7 @@ class UserController implements IUserController {
       }
       let userDTO: UserDTO;
       try {
-        userDTO = UserController.userDTO.toUser(user);
+        userDTO = UserController.userDTO.toUserCreate(user);
         await validateOrReject(userDTO);
       } catch (error) {
         return ResponseDTO.createErrorResponse(
@@ -70,8 +69,8 @@ class UserController implements IUserController {
           error
         );
       }
-      const userExist = await UserController.userService.getUserByUsername(
-        userDTO.getUsername()
+      const userExist = await UserController.userService.getUserByEmail(
+        userDTO.getEmail()
       );
 
       if (userExist) {
@@ -81,8 +80,14 @@ class UserController implements IUserController {
           ResponseMessage.USER_EXISTED
         );
       }
-
-      const userCreate = await UserController.userService.register(userDTO);
+      const salt = Helper.createSalt();
+      const passwordHash = Helper.hashPassword(userDTO.getPassword(), salt);
+      const userModel = UserController.userDTO.toUserModel(
+        userDTO,
+        passwordHash,
+        salt
+      );
+      const userCreate = await UserController.userService.register(userModel);
       if (userCreate) {
         UserController.verifyEmailRegister(userCreate);
         return ResponseDTO.createSuccessResponse(
@@ -110,7 +115,7 @@ class UserController implements IUserController {
   // add queue
   public static async verifyEmailRegister(user: IUser): Promise<void> {
     try {
-      const shortUrlObj = await UrlController.createShortUrlCtl(user.username);
+      const shortUrlObj = await UrlController.createShortUrlCtl(user.email);
       if (ResponseDTO.isSuccess(shortUrlObj)) {
         const url = ResponseDTO.getData(shortUrlObj);
         Mailer.mailVerify(user.email, user.fullname, url.short_url);
@@ -122,8 +127,8 @@ class UserController implements IUserController {
 
   public async getInfoUser(req: Request, res: Response): Promise<Response> {
     try {
-      const username: string = req.user.username;
-      const user = await UserController.userService.getUserByUsername(username);
+      const email: string = req.user.email;
+      const user = await UserController.userService.getUserByEmail(email);
       if (user) {
         return ResponseDTO.createSuccessResponse(
           res,
@@ -147,13 +152,19 @@ class UserController implements IUserController {
 
   public async editProfile(req: Request, res: Response): Promise<Response> {
     try {
-      const username: string = req.user.username;
-      const { fullname, password, email } = req.body;
+      const email: string = req.user.email;
+      const { fullname, password } = req.body;
+
+      let passwordHash = password;
+
+      if (password) {
+        const salt = Helper.createSalt();
+        passwordHash = Helper.hashPassword(password, salt);
+      }
 
       const userDTO = UserController.userDTO.toUserUpdate(
-        username,
         fullname,
-        password,
+        passwordHash,
         email
       );
       const userDTOOmit = omitBy(userDTO, isEmpty) as IUser;

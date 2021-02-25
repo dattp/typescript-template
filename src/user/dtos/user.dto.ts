@@ -2,29 +2,14 @@ import {
   IsEmail,
   IsNotEmpty,
   IsString,
-  Matches,
   MaxLength,
   MinLength,
 } from "class-validator";
 
-import { IUser } from "../models/user.model";
-
-enum UserType {
-  pub = "pub",
-  customer = "customer",
-}
+import UserModel, { IUser, UserType } from "../models/user.model";
 
 class UserDTO {
   private id: string;
-
-  @IsNotEmpty({
-    message: "username is not empty",
-  })
-  @IsString()
-  @MinLength(4)
-  @MaxLength(28)
-  @Matches(/^[a-z0-9-_.]+$/)
-  private username: string;
 
   @IsNotEmpty({
     message: "fullname is not empty",
@@ -33,7 +18,7 @@ class UserDTO {
   private fullname: string;
 
   @IsNotEmpty({
-    message: "username is not empty",
+    message: "email is not empty",
   })
   @IsEmail()
   private email: string;
@@ -48,13 +33,16 @@ class UserDTO {
     message: "password is not empty",
   })
   @IsString()
-  @MinLength(4)
-  @MaxLength(28)
+  @MinLength(4, {
+    message: "password length must be longer than or equal to 4 characters",
+  })
+  @MaxLength(28, {
+    message: "password length must be shorter than or equal to 28 characters",
+  })
   private password: string;
 
   constructor() {
     this.id = "";
-    this.username = "";
     this.fullname = "";
     this.email = "";
     this.usertype = UserType.pub;
@@ -64,7 +52,15 @@ class UserDTO {
   public toUser(user: IUser): UserDTO {
     const userDTO = new UserDTO();
     userDTO.id = user._id;
-    userDTO.username = user.username;
+    userDTO.fullname = user.fullname;
+    userDTO.email = user.email;
+    userDTO.usertype = UserType.pub;
+    userDTO.password = user.hashed_password;
+    return userDTO;
+  }
+
+  public toUserCreate(user: UserDTO): UserDTO {
+    const userDTO = new UserDTO();
     userDTO.fullname = user.fullname;
     userDTO.email = user.email;
     userDTO.usertype = UserType.pub;
@@ -73,24 +69,33 @@ class UserDTO {
   }
 
   public toUserUpdate(
-    username: string,
     fullname: string,
-    password: string,
+    hashedPassword: string,
     email: string
   ): UserDTO {
     const userDTO = new UserDTO();
-    userDTO.username = username;
     userDTO.fullname = fullname || "";
-    userDTO.password = password || "";
+    userDTO.password = hashedPassword || "";
     userDTO.email = email || "";
     return userDTO;
+  }
+
+  public toUserModel(
+    userDTO: UserDTO,
+    passwordHash: string,
+    salt: string
+  ): IUser {
+    const user: IUser = new UserModel();
+    user.fullname = userDTO.fullname;
+    user.email = userDTO.email;
+    user.hashed_password = passwordHash;
+    user.salt = salt;
+    user.usertype = UserType.pub;
+    return user;
   }
   //getter and setter
   getId(): string {
     return this.id;
-  }
-  getUsername(): string {
-    return this.username;
   }
   getFullname(): string {
     return this.fullname;
@@ -103,6 +108,9 @@ class UserDTO {
   }
   getPassword(): string {
     return this.password;
+  }
+  setPassword(password: string): void {
+    this.password = password;
   }
 }
 

@@ -28,6 +28,12 @@ import { UrlRoute } from "./url/routes/url.route";
 import { UrlController } from "./url/controllers/url.controller";
 import { UrlService } from "./url/services/url.service";
 
+import { CampaignRoute } from "./campaign/routes/campaign.route";
+import { CampaignController } from "./campaign/controllers/campaign.controller";
+import { CampaignService } from "./campaign/services/campaign.service";
+import { PubCampaignService } from "./campaign/services/pub-campaign.service";
+import { PubCampaignController } from "./campaign/controllers/pub-campaign.controller";
+
 class App {
   public app: any;
 
@@ -74,6 +80,19 @@ class App {
     const urlService = new UrlService();
     const urlController = new UrlController(urlService);
     new UrlRoute(this.app, urlController);
+
+    //campaign
+    const campaignService = new CampaignService();
+    const pubCampaignService = new PubCampaignService();
+    const campaignController = new CampaignController(
+      campaignService,
+      pubCampaignService
+    );
+    const pubCampaignController = new PubCampaignController(
+      pubCampaignService,
+      campaignService
+    );
+    new CampaignRoute(this.app, campaignController, pubCampaignController);
   }
 
   private _initMiddlewaresError() {
@@ -91,6 +110,18 @@ class App {
         console.log("connected to mongo");
       })
       .catch((error) => console.log(error));
+
+    // mongoose.set(
+    //   "debug",
+    //   function (coll: any, method: any, query: any, doc: any) {
+    //     //do your thing
+    //     console.log(
+    //       `MongoDB : ${coll}.${method}(${JSON.stringify(
+    //         query
+    //       )},${JSON.stringify(doc)})`
+    //     );
+    //   }
+    // );
   }
 
   private _connectRedis() {

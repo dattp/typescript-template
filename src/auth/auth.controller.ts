@@ -10,6 +10,7 @@ import STATUSUSER from "../constants/statususer.constant";
 import { ResponseMessage } from "../constants/message.constants";
 import { ResponseDTO } from "../core/dtos/response.dto";
 import { UrlService } from "../url/services/url.service";
+import { URL } from "../constants/url.constants";
 
 const redisClient = redis.createClient({
   host: process.env.REDIS_HOST,
@@ -27,10 +28,17 @@ class AuthController {
     .REFRESH_TOKEN_TIME as string;
 
   public async login(req: Request, res: Response): Promise<Response> {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
     const userService = new UserService();
     try {
-      const user = await userService.getUserByUsername(username);
+      const user = await userService.getUserByEmail(email);
+      if (!user) {
+        return ResponseDTO.createErrorResponse(
+          res,
+          STATUSCODE.ERROR_CMM,
+          ResponseMessage.USER_NOT_EXISTED
+        );
+      }
       if (user && user.status === STATUSUSER.PENDING) {
         return ResponseDTO.createErrorResponse(
           res,
@@ -41,7 +49,7 @@ class AuthController {
       if (
         user &&
         user.status === STATUSUSER.ACTIVE &&
-        Helper.validatePassword(password, user.password, user.salt)
+        Helper.validatePassword(password, user.hashed_password, user.salt)
       ) {
         const refreshToken = await JWTToken.generateToken(
           user,
@@ -151,23 +159,18 @@ class AuthController {
           ResponseMessage.MISSING_PARAM
         );
       }
-      let urlRedirect = "http://localhost:9000/not-found";
+      let urlRedirect = URL.NOT_FOUND;
       const userService = new UserService();
       const urlService = new UrlService();
       const url = await urlService.getlUrl(short);
       // if (user && user.token === token) {
       if (url && url.token === token) {
         const updateStatusUser = await userService.updateStatusUser(
-          url.username,
+          url.email,
           STATUSUSER.ACTIVE
         );
         if (updateStatusUser) {
           urlRedirect = process.env.PUB_LOGIN as string;
-          res.writeHead(301, {
-            Location: urlRedirect,
-          });
-          res.end();
-          return res;
         }
       }
       res.writeHead(301, {
