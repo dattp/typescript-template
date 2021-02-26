@@ -180,7 +180,7 @@
         "tags": [
           "users"
         ],
-        "summary": "update profile user",
+        "summary": "change password",
         "description": "",
         "consumes": [
           "application/json"
