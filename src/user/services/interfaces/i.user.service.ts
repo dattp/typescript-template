@@ -5,6 +5,7 @@ interface IUserService {
   register(user: IUser): Promise<IUser | null>;
   updateStatusUser(email: string, status: number): Promise<IUser | null>;
   updateProfile(userUpdate: IUser): Promise<IUser | null>;
+  updatePassword(email: string, passwordHash: string): Promise<IUser | null>;
 }
 
 export { IUserService };

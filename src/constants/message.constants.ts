@@ -6,6 +6,7 @@ class ResponseMessage {
   public static USER_NOT_EXISTED = "user not existed";
   public static NOT_FOUND = "not found";
   public static USER_NOT_ACTIVE = "user not active, check your mail!";
+  public static PASSWORD_WRONG = "password wrong!";
 }
 
 export { ResponseMessage };
