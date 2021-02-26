@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { validateOrReject } from "class-validator";
-import { omitBy, isEmpty } from "lodash";
+import { omitBy, isNil } from "lodash";
 
 import { IUserService } from "../services/interfaces/i.user.service";
 import { IUserController } from "./interfaces/i.user.controller";
-import { UserDTO } from "../dtos/user.dto";
+import { UserDTO, UserUpdateDTO } from "../dtos/user.dto";
 import { ResponseDTO } from "../../core/dtos/response.dto";
 import { IUser } from "../models/user.model";
 import STATUSCODE from "../../constants/statuscode.constant";
@@ -16,10 +16,12 @@ import { Helper } from "../../utils/helper";
 class UserController implements IUserController {
   private static userService: IUserService;
   private static userDTO: UserDTO;
+  private static userUpdateDTO: UserUpdateDTO;
 
   constructor(service: IUserService) {
     UserController.userService = service;
     UserController.userDTO = new UserDTO();
+    UserController.userUpdateDTO = new UserUpdateDTO();
   }
 
   public async getUserByEmail(req: Request, res: Response): Promise<Response> {
@@ -153,21 +155,26 @@ class UserController implements IUserController {
   public async editProfile(req: Request, res: Response): Promise<Response> {
     try {
       const email: string = req.user.email;
-      const { fullname, password } = req.body;
+      const { fullname, phone, birthday } = req.body;
+      let userUpdateDTO: UserUpdateDTO;
+      try {
+        userUpdateDTO = UserController.userUpdateDTO.toUserUpdate(
+          fullname,
+          email,
+          phone,
+          Helper.convertStringToDate(birthday)
+        );
 
-      let passwordHash = password;
-
-      if (password) {
-        const salt = Helper.createSalt();
-        passwordHash = Helper.hashPassword(password, salt);
+        await validateOrReject(userUpdateDTO);
+      } catch (error) {
+        return ResponseDTO.createErrorResponse(
+          res,
+          STATUSCODE.NOT_FOUND,
+          error
+        );
       }
 
-      const userDTO = UserController.userDTO.toUserUpdate(
-        fullname,
-        passwordHash,
-        email
-      );
-      const userDTOOmit = omitBy(userDTO, isEmpty) as IUser;
+      const userDTOOmit = omitBy(userUpdateDTO, isNil) as IUser;
       const userUpdate = await UserController.userService.updateProfile(
         userDTOOmit
       );
@@ -182,6 +189,79 @@ class UserController implements IUserController {
         res,
         STATUSCODE.ERROR_CMM,
         ResponseMessage.FAIL
+      );
+    } catch (error) {
+      return ResponseDTO.createErrorResponse(
+        res,
+        STATUSCODE.SERVER_ERROR,
+        error.message
+      );
+    }
+  }
+
+  public async changePassword(req: Request, res: Response): Promise<Response> {
+    const email: string = req.user.email;
+    const {
+      old_password: oldPassword,
+      new_password: newPassword,
+      confirm_password: confirmPassword,
+    } = req.body;
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      return ResponseDTO.createErrorResponse(
+        res,
+        STATUSCODE.ERROR_CMM,
+        ResponseMessage.MISSING_PARAM
+      );
+    }
+
+    if (newPassword.length < 5 || newPassword.length > 28) {
+      return ResponseDTO.createErrorResponse(
+        res,
+        STATUSCODE.ERROR_CMM,
+        ResponseMessage.PASSWORD_WRONG
+      );
+    }
+
+    if (oldPassword === newPassword || newPassword !== confirmPassword) {
+      return ResponseDTO.createErrorResponse(
+        res,
+        STATUSCODE.ERROR_CMM,
+        ResponseMessage.PASSWORD_WRONG
+      );
+    }
+    try {
+      const user = await UserController.userService.getUserByEmail(email);
+      if (!user) {
+        return ResponseDTO.createErrorResponse(
+          res,
+          STATUSCODE.NOT_FOUND,
+          ResponseMessage.USER_NOT_EXISTED
+        );
+      }
+      const oldPasswordHash = Helper.hashPassword(oldPassword, user.salt);
+      if (oldPasswordHash !== user.hashed_password) {
+        return ResponseDTO.createErrorResponse(
+          res,
+          STATUSCODE.ERROR_CMM,
+          ResponseMessage.PASSWORD_WRONG
+        );
+      }
+      const newPasswordHash = Helper.hashPassword(newPassword, user.salt);
+      const userUpdate = await UserController.userService.updatePassword(
+        email,
+        newPasswordHash
+      );
+      if (!userUpdate) {
+        return ResponseDTO.createErrorResponse(
+          res,
+          STATUSCODE.ERROR_CMM,
+          ResponseMessage.FAIL
+        );
+      }
+      return ResponseDTO.createSuccessResponse(
+        res,
+        STATUSCODE.SUCCESS,
+        ResponseMessage.SUCCESS
       );
     } catch (error) {
       return ResponseDTO.createErrorResponse(

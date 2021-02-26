@@ -46,7 +46,21 @@ class UserService implements IUserService {
       return UserModel.findOneAndUpdate(
         { email: userUpdate.email },
         userUpdate
-      );
+      ).lean();
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  public async updatePassword(
+    email: string,
+    passwordHash: string
+  ): Promise<IUser | null> {
+    try {
+      return UserModel.findOneAndUpdate(
+        { email },
+        { hashed_password: passwordHash }
+      ).lean();
     } catch (error) {
       throw new Error(error);
     }

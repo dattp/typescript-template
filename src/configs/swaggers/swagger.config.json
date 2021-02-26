@@ -110,12 +110,41 @@
         ]
       }
     },
-    "/api/v1/user/edit-profile": {
+    "/api/v1/user/profile/info": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "get info user",
+        "description": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "user not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
       "post": {
         "tags": [
           "users"
         ],
-        "summary": "register user",
+        "summary": "update profile user",
         "description": "",
         "consumes": [
           "application/json"
@@ -146,12 +175,12 @@
         ]
       }
     },
-    "/api/v1/user/info-user": {
-      "get": {
+    "/api/v1/user/profile/change-password": {
+      "post": {
         "tags": [
           "users"
         ],
-        "summary": "get info user",
+        "summary": "change password",
         "description": "",
         "consumes": [
           "application/json"
@@ -159,15 +188,31 @@
         "produces": [
           "application/json"
         ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "user object",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "old_password": {
+                  "type": "string"
+                },
+                "new_password": {
+                  "type": "string"
+                },
+                "confirm_password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
         "responses": {
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "user not found"
-          },
           "405": {
-            "description": "Validation exception"
+            "description": "Invalid input"
           }
         },
         "security": [
@@ -471,7 +516,10 @@
         "fullname": {
           "type": "string"
         },
-        "password": {
+        "phone": {
+          "type": "string"
+        },
+        "birthday": {
           "type": "string"
         }
       }

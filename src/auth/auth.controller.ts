@@ -72,7 +72,7 @@ class AuthController {
       return ResponseDTO.createErrorResponse(
         res,
         STATUSCODE.ERROR_CMM,
-        ResponseMessage.USER_NOT_ACTIVE
+        ResponseMessage.FAIL
       );
     } catch (error) {
       console.log(error);

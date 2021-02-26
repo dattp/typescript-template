@@ -15,6 +15,8 @@ export interface IUser extends Document {
   hashed_password: string;
   salt: string;
   status: number;
+  phone: string;
+  birthday: Date;
 }
 
 const UserSchema: Schema = new Schema({
@@ -30,6 +32,8 @@ const UserSchema: Schema = new Schema({
   hashed_password: { type: String, required: true },
   salt: { type: String, required: true },
   status: { type: Number, required: true, default: 2 },
+  phone: { type: String },
+  birthday: { type: Date },
 });
 
 // Export the model and return your IUser interface

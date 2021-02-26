@@ -1,7 +1,10 @@
 import {
+  IsDate,
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
+  Matches,
   MaxLength,
   MinLength,
 } from "class-validator";
@@ -41,12 +44,22 @@ class UserDTO {
   })
   private password: string;
 
+  @IsString()
+  @MinLength(10)
+  @MaxLength(12)
+  private phone: string;
+
+  @IsDate()
+  private birthday: Date;
+
   constructor() {
     this.id = "";
     this.fullname = "";
     this.email = "";
     this.usertype = UserType.pub;
     this.password = "";
+    this.phone = "";
+    this.birthday = new Date();
   }
 
   public toUser(user: IUser): UserDTO {
@@ -56,6 +69,8 @@ class UserDTO {
     userDTO.email = user.email;
     userDTO.usertype = UserType.pub;
     userDTO.password = user.hashed_password;
+    userDTO.phone = user.phone || "";
+    userDTO.birthday = user.birthday || "";
     return userDTO;
   }
 
@@ -65,18 +80,6 @@ class UserDTO {
     userDTO.email = user.email;
     userDTO.usertype = UserType.pub;
     userDTO.password = user.password;
-    return userDTO;
-  }
-
-  public toUserUpdate(
-    fullname: string,
-    hashedPassword: string,
-    email: string
-  ): UserDTO {
-    const userDTO = new UserDTO();
-    userDTO.fullname = fullname || "";
-    userDTO.password = hashedPassword || "";
-    userDTO.email = email || "";
     return userDTO;
   }
 
@@ -114,4 +117,45 @@ class UserDTO {
   }
 }
 
-export { UserDTO };
+class UserUpdateDTO {
+  @IsOptional()
+  @IsString()
+  private fullname: string;
+
+  @IsEmail()
+  private email: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(10)
+  @MaxLength(12)
+  @Matches(/(03|05|07|08|09|01[2|6|8|9])+([0-9]{8})\b/)
+  private phone: string;
+
+  @IsOptional()
+  @IsDate()
+  private birthday: Date | null;
+
+  constructor() {
+    this.fullname = "";
+    this.email = "";
+    this.phone = "";
+    this.birthday = new Date();
+  }
+
+  public toUserUpdate(
+    fullname: string,
+    email: string,
+    phone: string,
+    birthday: Date | null
+  ): UserUpdateDTO {
+    const userDTO = new UserUpdateDTO();
+    userDTO.fullname = fullname;
+    userDTO.email = email;
+    userDTO.phone = phone;
+    userDTO.birthday = birthday;
+    return userDTO;
+  }
+}
+
+export { UserDTO, UserUpdateDTO };
