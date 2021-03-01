@@ -12,6 +12,7 @@ import { ResponseMessage } from "../../constants/message.constants";
 import { Mailer } from "../../utils/mailer";
 import { UrlController } from "../../url/controllers/url.controller";
 import { Helper } from "../../utils/helper";
+import { createMailRegisterQueue } from "../../queues/queue.create";
 
 class UserController implements IUserController {
   private static userService: IUserService;
@@ -120,7 +121,14 @@ class UserController implements IUserController {
       const shortUrlObj = await UrlController.createShortUrlCtl(user.email);
       if (ResponseDTO.isSuccess(shortUrlObj)) {
         const url = ResponseDTO.getData(shortUrlObj);
-        Mailer.mailVerify(user.email, user.fullname, url.short_url);
+        createMailRegisterQueue.add(
+          {
+            email: user.email,
+            fullname: user.fullname,
+            shortUrl: url.short_url,
+          },
+          { attempts: 3, backoff: 1000, removeOnComplete: true }
+        );
       }
     } catch (error) {
       throw new Error(error);

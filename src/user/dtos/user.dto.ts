@@ -44,12 +44,8 @@ class UserDTO {
   })
   private password: string;
 
-  @IsString()
-  @MinLength(10)
-  @MaxLength(12)
   private phone: string;
 
-  @IsDate()
   private birthday: Date;
 
   constructor() {
