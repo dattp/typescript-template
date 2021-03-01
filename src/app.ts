@@ -8,6 +8,7 @@ import cors from "cors";
 import { join } from "path";
 import swaggerUi from "swagger-ui-express";
 import basicAuth from "express-basic-auth";
+import { router } from "bull-board";
 
 const bluebird = require("bluebird");
 const redis = bluebird.promisifyAll(require("redis"));
@@ -62,6 +63,7 @@ class App {
       swaggerUi.serve,
       swaggerUi.setup(swaggerDocument)
     );
+    this.app.use("/queues", router);
   }
 
   private _loadRoute() {
