@@ -9,6 +9,7 @@ import { join } from "path";
 import swaggerUi from "swagger-ui-express";
 import basicAuth from "express-basic-auth";
 import { router } from "bull-board";
+import cookieParser from "cookie-parser";
 
 const bluebird = require("bluebird");
 const redis = bluebird.promisifyAll(require("redis"));
@@ -53,6 +54,8 @@ class App {
     this.app.use(morgan("dev"));
     this.app.use(helmet());
     this.app.use(cors());
+    this.app.use(cookieParser());
+    this.app.disable("x-powered-by");
     this.app.use(
       "/api-docs",
       basicAuth({

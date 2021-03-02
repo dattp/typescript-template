@@ -152,6 +152,47 @@ class UserUpdateDTO {
     userDTO.birthday = birthday;
     return userDTO;
   }
+
+  public toUserJWT(user: IUser): UserUpdateDTO {
+    const userDTO = new UserUpdateDTO();
+    userDTO.fullname = user.fullname;
+    userDTO.email = user.email;
+    userDTO.phone = user.phone;
+    return userDTO;
+  }
 }
 
-export { UserDTO, UserUpdateDTO };
+class UserJWTDTO {
+  private id: string;
+  @IsOptional()
+  @IsString()
+  private fullname: string;
+
+  @IsEmail()
+  private email: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(10)
+  @MaxLength(12)
+  @Matches(/(03|05|07|08|09|01[2|6|8|9])+([0-9]{8})\b/)
+  private phone: string;
+
+  constructor() {
+    this.id = "";
+    this.fullname = "";
+    this.email = "";
+    this.phone = "";
+  }
+
+  public toUserJWT(user: IUser): UserJWTDTO {
+    const userDTO = new UserJWTDTO();
+    userDTO.id = user._id;
+    userDTO.fullname = user.fullname;
+    userDTO.email = user.email;
+    userDTO.phone = user.phone;
+    return userDTO;
+  }
+}
+
+export { UserDTO, UserUpdateDTO, UserJWTDTO };

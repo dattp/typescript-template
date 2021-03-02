@@ -36,13 +36,14 @@ class AuthorizationMDW {
         AuthorizationMDW.secretToken
       );
       if (!userDecoded) return res.sendStatus(401);
-      const refreshToken = userDecoded.data.refresh_token;
-      const accessToken = await redisClient.getAsync(`auth:${refreshToken}`);
+      const refreshToken = req.cookies["refresh_token"];
+      const accessToken = await redisClient.getAsync(
+        `auth:${userDecoded.data.email}:${refreshToken}`
+      );
       if (!accessToken || accessToken !== tokenClient) {
         return res.sendStatus(401);
       }
-      const user = userDto.toUser(userDecoded.data);
-      req.user = { ...user, refresh_token: refreshToken };
+      req.user = userDto.toUser(userDecoded.data);
       return next();
     } catch (error) {
       console.log(error);
