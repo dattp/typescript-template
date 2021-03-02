@@ -299,22 +299,6 @@
         "produces": [
           "application/json"
         ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "object",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "refresh_token": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "successful operation",

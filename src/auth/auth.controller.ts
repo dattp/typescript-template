@@ -11,11 +11,20 @@ import { ResponseMessage } from "../constants/message.constants";
 import { ResponseDTO } from "../core/dtos/response.dto";
 import { UrlService } from "../url/services/url.service";
 import { URL } from "../constants/url.constants";
+import { UserJWTDTO } from "../user/dtos/user.dto";
 
 const redisClient = redis.createClient({
   host: process.env.REDIS_HOST,
   port: parseInt(process.env.REDIS_PORT || "6379", 10),
 });
+
+declare global {
+  namespace Express {
+    interface Request {
+      user: any;
+    }
+  }
+}
 
 class AuthController {
   private static readonly secretToken = process.env
@@ -29,7 +38,10 @@ class AuthController {
 
   public async login(req: Request, res: Response): Promise<Response> {
     const { email, password } = req.body;
+
     const userService = new UserService();
+    const userDto = new UserJWTDTO();
+
     try {
       const user = await userService.getUserByEmail(email);
       if (!user) {
@@ -52,21 +64,31 @@ class AuthController {
         Helper.validatePassword(password, user.hashed_password, user.salt)
       ) {
         const refreshToken = await JWTToken.generateToken(
-          user,
+          userDto.toUserJWT(user),
           AuthController.refreshTokenSecret,
           AuthController.refreshTokenTime
         );
         const accessToken = await JWTToken.generateToken(
-          { ...user, refresh_token: refreshToken },
+          userDto.toUserJWT(user),
           AuthController.secretToken,
           AuthController.secretTokenTime
         );
-        await redisClient.setAsync(`auth:${refreshToken}`, accessToken);
-        await redisClient.expire(`auth:${refreshToken}`, 60 * 60 * 24 * 365);
+        await redisClient.setAsync(
+          `auth:${user.email}:${refreshToken}`,
+          accessToken
+        );
+        await redisClient.expire(
+          `auth:${user.email}:${refreshToken}`,
+          60 * 60 * 24 * 365
+        );
+        res.cookie("refresh_token", refreshToken, {
+          maxAge: 60 * 60 * 24 * 365,
+          httpOnly: true,
+          secure: false,
+        });
 
         return ResponseDTO.createSuccessResponse(res, STATUSCODE.SUCCESS, {
           access_token: accessToken,
-          refresh_token: refreshToken,
         });
       }
       return ResponseDTO.createErrorResponse(
@@ -86,9 +108,16 @@ class AuthController {
 
   public async logout(req: Request, res: Response): Promise<Response> {
     try {
-      const refreshToken: string = req.user.refresh_token as string;
-      const result = await redisClient.delAsync(`auth:${refreshToken}`);
+      const refreshToken: string = req.cookies["refresh_token"];
+
+      const result = await redisClient.delAsync(
+        `auth:${req.user.email}:${refreshToken}`
+      );
       if (result) {
+        res.cookie("refresh_token", "", {
+          httpOnly: true,
+          expires: new Date(0),
+        });
         return ResponseDTO.createSuccessResponse(
           res,
           STATUSCODE.SUCCESS,
@@ -112,38 +141,89 @@ class AuthController {
   }
 
   public async accessToken(req: Request, res: Response): Promise<Response> {
-    const refreshToken = req.body.refresh_token;
-    const tokenExisted = await redisClient.existsAsync(`auth:${refreshToken}`);
-    if (refreshToken && tokenExisted) {
-      try {
-        const decoded = await JWTToken.verifyToken(
-          refreshToken,
-          AuthController.refreshTokenSecret
-        );
-        const user = decoded.data;
-        const accessToken = await JWTToken.generateToken(
-          { ...user, refresh_token: refreshToken },
-          AuthController.secretToken,
-          AuthController.secretTokenTime
-        );
-        await redisClient.setAsync(`auth:${refreshToken}`, accessToken);
-        await redisClient.expire(`auth:${refreshToken}`, 60 * 60 * 24 * 365);
-        return ResponseDTO.createSuccessResponse(res, STATUSCODE.SUCCESS, {
-          access_token: accessToken,
-        });
-      } catch (error) {
-        console.log(error);
+    const refreshToken = req.cookies["refresh_token"];
+    try {
+      const refreshTokenDecoded = await JWTToken.verifyToken(
+        refreshToken,
+        AuthController.refreshTokenSecret
+      );
+
+      const user = refreshTokenDecoded.data;
+      const accessTokenInDB = await redisClient.getAsync(
+        `auth:${user.email}:${refreshToken}`
+      );
+
+      if (refreshToken && accessTokenInDB) {
+        try {
+          // const accessToken = await JWTToken.generateToken(
+          //   user,
+          //   AuthController.secretToken,
+          //   AuthController.secretTokenTime
+          // );
+
+          // const refreshTokenNew = await JWTToken.generateToken(
+          //   {
+          //     email: req.user.email,
+          //   },
+          //   AuthController.refreshTokenSecret,
+          //   AuthController.refreshTokenTime
+          // );
+
+          const [accessToken, refreshTokenNew] = await Promise.all([
+            JWTToken.generateToken(
+              user,
+              AuthController.secretToken,
+              AuthController.secretTokenTime
+            ),
+            JWTToken.generateToken(
+              {
+                email: user.email,
+              },
+              AuthController.refreshTokenSecret,
+              AuthController.refreshTokenTime
+            ),
+          ]);
+
+          await redisClient.setAsync(
+            `auth:${user.email}:${refreshTokenNew}`,
+            accessToken
+          );
+          await redisClient.expire(
+            `auth:${user.email}:${refreshTokenNew}`,
+            60 * 60 * 24 * 365
+          );
+          await redisClient.delAsync(`auth:${user.email}:${refreshToken}`);
+
+          res.cookie("refresh_token", refreshTokenNew, {
+            maxAge: 60 * 60 * 24 * 365,
+            httpOnly: true,
+            secure: false,
+          });
+
+          return ResponseDTO.createSuccessResponse(res, STATUSCODE.SUCCESS, {
+            access_token: accessToken,
+          });
+        } catch (error) {
+          console.log(error);
+          return ResponseDTO.createErrorResponse(
+            res,
+            STATUSCODE.SERVER_ERROR,
+            error
+          );
+        }
+      } else {
         return ResponseDTO.createErrorResponse(
           res,
-          STATUSCODE.SERVER_ERROR,
-          error
+          STATUSCODE.ERROR_CMM,
+          ResponseMessage.USER_NOT_EXISTED
         );
       }
-    } else {
+    } catch (error) {
+      console.log(error);
       return ResponseDTO.createErrorResponse(
         res,
-        STATUSCODE.ERROR_CMM,
-        ResponseMessage.USER_NOT_EXISTED
+        STATUSCODE.SERVER_ERROR,
+        error
       );
     }
   }

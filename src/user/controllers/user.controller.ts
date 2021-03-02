@@ -138,6 +138,7 @@ class UserController implements IUserController {
   public async getInfoUser(req: Request, res: Response): Promise<Response> {
     try {
       const email: string = req.user.email;
+
       const user = await UserController.userService.getUserByEmail(email);
       if (user) {
         return ResponseDTO.createSuccessResponse(
