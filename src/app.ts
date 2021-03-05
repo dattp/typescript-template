@@ -53,7 +53,12 @@ class App {
     this.app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
     this.app.use(morgan("dev"));
     this.app.use(helmet());
-    this.app.use(cors());
+    this.app.use(
+      cors({
+        origin: true,
+        credentials: true,
+      })
+    );
     this.app.use(cookieParser());
     this.app.disable("x-powered-by");
     this.app.use(
